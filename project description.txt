@@ -1,0 +1,45 @@
+Project: Instagram Profile Ranking Dashboard
+
+1. Project Overview  
+ This project is a full-stack web application that tracks and displays real-time statistics for public Instagram profiles. It features a centralized dashboard that fetches live data, including follower counts, following counts, and post numbers, from a third-party scraping API.
+
+ The main goal is to give users a quick view of multiple profiles, allowing them to rank and compare based on important social media metrics. The application uses a Python Flask backend to handle data fetching and a vanilla JavaScript frontend to create an interactive, auto-updating user interface.
+
+2. Key Features  
+ Real-Time Data Scraping: Connects to an external API (like Apify) to fetch live data for any public Instagram profile.
+
+Tabular Dashboard: Displays all tracked profiles in a clear, easy-to-read table with visible rankings.
+
+ Dynamic Ranking & Sorting: Automatically ranks profiles by follower count and lets users manually sort the data by followers, following, or post count in either order.
+
+ Interactive Profile Management: The dashboard is fully interactive. Users can add new profiles to track or remove existing ones with the click of a button.
+
+ Auto-Refresh: The data refreshes every 30 seconds to keep the rankings and statistics up-to-date.
+
+ User-Friendly Formatting: Large numbers (thousands, millions) are shortened for easier reading (e.g., 25.4M followers).
+
+3. Technology Stack  
+ Backend: Python with the Flask web framework.
+
+ Frontend: JavaScript, HTML5, and CSS3.
+
+ Data Fetching: The requests library in Python is used to communicate with a third-party Instagram scraping API.
+
+ Data Storage: A local data.json file stores the list of tracked usernames between sessions.
+
+4. Analysis of the UI Race Condition Glitch  
+A notable UI glitch was found and fixed. This issue happened during a sequence of user actions: removing a profile and then immediately adding a new one.
+
+  *Detailed Description of the Glitch:
+
+  (i)Remove Action: A user removes a profile. The original frontend code performed an "optimistic update," immediately hiding the row from the UI while the delete request was processed in the background.
+
+  (ii)Add Action: Before the server could confirm the deletion, the user would add a new profile. A temporary "Fetching data..." row would appear correctly.
+
+  (iii)Race Condition: The background auto-refresh timer, which runs every 30 seconds, would then trigger. It would request the complete list of profiles from the backend server.
+
+  (iv)Inconsistent State: Because the server hadn’t finished processing the remove request, it would send back a profile list that still included the supposedly "removed" profile.
+
+  (v)UI Reverts: The frontend would receive this outdated data and re-render the table, causing the "removed" profile to reappear and the "loading..." row for the new profile to disappear.
+
+  (vi)Final Correction: Once all server operations (the remove and the add) were finished, the next refresh cycle would update the UI, showing the correct list of profiles.
